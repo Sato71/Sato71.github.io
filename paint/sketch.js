@@ -2,6 +2,8 @@
 let px = 0;
 let py = 0;
 
+let sw = 5;//線の太さ
+
 let colorInput;//カラーピッカーを入れる変数　そもそもhtmlにinputでカラーピッカーを入れている。
 let dataInput;
 
@@ -21,8 +23,13 @@ function setup() {
 }
 
 function draw() {
-  strokeWeight(10);
+  if (keyIsDown(70) && sw < 80){//Fキー
+    sw++;//太くする
+  } else if (keyIsDown(68) && sw > 1){//Dキー
+    sw--;//細くする
+  }
 
+  strokeWeight(sw);//線の太さ
 
   if (mouseIsPressed){//マウスボタンを押している時
     line(px, py, mouseX, mouseY);//(始点xyと終点xy)
