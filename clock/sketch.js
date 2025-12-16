@@ -18,6 +18,13 @@ let week = [
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  angleMode(DEGREES);//角度
+
+  //空の画像の読み込み
+  loadImage('sky.png', newImg => {
+    sky = newImg;
+  });
+
   getData();//天気の取得開始
 
   // let dog; // 犬
@@ -40,11 +47,7 @@ function draw() {
   // let c = map(h, 0, 23, 0, 200);
   // background(0, c, 200);
   
-  //背景　先生
-  loadImage('sky.png', newImg =>{
-
-  });
-
+  
   let cx = width / 2;
   let cy = height / 2;
 
@@ -62,17 +65,29 @@ function draw() {
   let minute = date.getMinutes();//現在の分
   let second = date.getSeconds();//現在の秒
 
-  //背景　先生
+  //空の色
+  let skyColor;
   if(sky){
-    let skyColor = sky.get(h * 10, 10);
+    skyColor = sky.get(map(currenthour, 0, 24, 0, 800), 10);
     background(skyColor);
   }
 
+  //アナログ時計表示
+  push();
+  translate(cx, cy);
+  drawAnalog(date,400);
+  pop();
+
+  //push();
+  //strokeWeight(10);
+  //stroke(skyColor);
   textAlign(CENTER);
   textSize(30);
   textStyle(BOLD);
   text(year + '/' + month + '/' + day + '(' + week[dow] + ')', cx, cy - 40);
   text(currenthour + ':' + minute + ':' + second, cx, cy);
+
+
   
   if(data){//データが取得済みなら
    //温度
@@ -91,4 +106,53 @@ function getData(){
     data = newData;//データ取得完了
     console.log(data);
   });
+}
+
+
+//自作関数　アナログ時計を表示　　自作関数自由にどんどん作っていい
+function drawAnalog(date,size){
+  noFill();
+  stroke('white');
+  strokeCap(SQUARE)
+
+  strokeWeight(5);
+  circle(0, 0, size)
+
+  strokeWeight(5);
+
+
+  let h = date.getHours();
+  let m = date.getMinutes();
+  let s = date.getSeconds();
+
+
+  let l = size / 3;//針の長さ
+  let d = map(h, 0, 24, 0, 360 * 2) - 90;//針の角度
+  let x = cos(d) * l;//針のx座標
+  let y = sin(d) * l;//針のy座標
+  line(0, 0, x, y);
+
+  l = size * 0.4;
+  d = map(m, 0, 60, 0, 360) - 90;
+  x = cos(d) * l;//針のx座標
+  y = sin(d) * l;//針のy座標
+  line(0, 0, x, y);
+
+  strokeWeight(2);
+  l = size * 0.5;
+  d = map(s, 0, 60, 0, 360) - 90;
+  x = cos(d) * l;//針のx座標
+  y = sin(d) * l;//針のy座標
+  line(0, 0, x, y);
+
+  //文字盤
+  // noStroke();
+  // fill('white');
+  // l = size * 0.45;
+  // for(let i = 1; i <= 12; i++){
+  //   d = map((360 / 12) * i) - 90;
+  //   x = cos(d) * l;
+  //   y = sin(d) * l;
+  //   text(i, x, y);
+  // }
 }
