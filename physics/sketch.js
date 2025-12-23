@@ -1,3 +1,5 @@
+import { Fruit } from './Fruit.js'//輸入
+
 let { Engine, Bodies, Composite } = Matter;//モジュールを変数化
 let engine;//物理演算用の空間
 
@@ -5,6 +7,9 @@ function setup() {
   createCanvas(400, 400);
 
   engine = Engine.create();
+
+  // //Fruitインスタンスを生成
+  // let apple = new Fruit('apple', 200, 200, engine.world);
 
   //箱を生成
   let boxA = Bodies.rectangle(150, 200, 120, 120);//x, y, 幅, 高さ
@@ -23,7 +28,8 @@ function draw() {
   let bodies = Composite.allBodies(engine.world);
 
   for(let i = 0; i < bodies.length; i++){
-    drawBody(bodies[i]);
+    if (bodies[i].fruit)bodies[i].fruit.draw();
+    else drawBody(bodies[i]);
   }
 
   //世界の更新(1フレーム時間を進める)
@@ -41,3 +47,14 @@ function drawBody(body){
   }
   endShape(CLOSE);//多角形描画終了
 }
+
+//クリックをすると実行
+function mousePressed(){
+  new Fruit('orange', mouseX, mouseY, engine.world);
+}
+
+
+//type="module"の場合は以下が必要
+window.setup = setup;
+window.draw = draw;
+window.mousePressed = mousePressed;
