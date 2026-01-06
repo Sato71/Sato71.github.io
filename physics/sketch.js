@@ -1,10 +1,16 @@
 import { Fruit } from './Fruit.js'//輸入
 
-let { Engine, Bodies, Composite } = Matter;//モジュールを変数化
+let { Engine, Bodies, Composite, Events } = Matter;//モジュールを変数化
 let engine;//物理演算用の空間
+
+let pon;
 
 function setup() {
   createCanvas(400, 400);
+
+  loadSound('pon_cute.wav', data => {
+    pon = data;
+  });
 
   engine = Engine.create();
 
@@ -19,6 +25,19 @@ function setup() {
 
   //箱を世界に配置
   Composite.add(engine.world, [boxA, boxB, ball, ground]);
+
+  //物体同士が衝突したとき、コールバックを実行させる
+  Events.on(engine, 'collisionStart', ev => {
+    if(pon)pon.play();
+    for(let i = 0; i < ev.pairs.length; i++){
+      let pair = ev.pairs[i];//衝突したペア
+      let a = pair.bodyA;//衝突物A
+      let b = pair.bodyB;//衝突物B
+      if (a.fruit){//Aがfruitだったら
+        a.fruit.hit(b, b.fruit);
+      }
+    }
+  });
 }
 
 function draw() {
@@ -50,7 +69,8 @@ function drawBody(body){
 
 //クリックをすると実行
 function mousePressed(){
-  new Fruit('orange', mouseX, mouseY, engine.world);
+  //Fruitインスタンスを生成
+  new Fruit('cherry', mouseX, mouseY, engine.world);
 }
 
 
