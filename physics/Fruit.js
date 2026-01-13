@@ -1,34 +1,43 @@
+import { ShapeCherry, ShapeBerry, ShapeGrape, ShapeOrange, ShapeKaki, ShapeApple, ShapePeach, ShapeMelon } from './shapes.js'
+import { drawBody, scaleShape } from './util.js'
+
 let { Engine, Bodies, Composite } = Matter;//モジュールを変数化
 
 class Fruit{
     constructor(type, x, y, world){
         console.log('果物:' + type + 'ができました。');
+        this.merged = false;//合成済みかどうか
         this.type = type;//自分の果物タイプ
         this.data = data[type];
-        this.body = Bodies.circle(x, y, this.data.size);//物理的な実体 this.bodyで保持
-        this.body.fruit = this;//ここあってるかわからん！！！！！！！
-        this.world = world;
+
+        if(this.data.shape){
+            this.body = Bodies.fromVertices(x, y, this.data.shape);
+        }else {
+            this.body = Bodies.circle(x, y, this.data.size);//物理的な実体 this.bodyで保持
+        }
+        this.body.fruit = this;
+
+        this.world = world;//自分が属する世界
         Composite.add(world, this.body);
     }
 
     draw(){
         push();
+        stroke(this.data.color);
         fill(this.data.color);
-        let v = this.body.vertices;//物体の頂点（配列）
-        beginShape();//多角形描画開始
-        for (let i = 0; i < v.length; i++){
-        vertex(v[i].x, v[i].y);
-        }
-        endShape(CLOSE);//多角形描画終了
+        drawBody(this.body);
         pop();
     }
 
     hit(b, fruit){
+        if(this.merged) return;
+
         if(fruit){
             console.log('私は'+this.type);
             console.log(fruit.type + 'とぶつかったよ');
             if(this.type == fruit.type){//　==これは前期で習った
                 //相手が同じtypeだったら
+                this.merged = true;
                 this.merge(b);//Bと合体する
             }
         }
@@ -46,7 +55,7 @@ class Fruit{
 
         //Aから見た衝突位置
         let dx = (bx - ax) / 2;
-        let dy = (bx - ay) / 2;
+        let dy = (by - ay) / 2;
 
         //絶対衝突位置
         let x = ax + dx;
@@ -64,6 +73,8 @@ class Fruit{
             new Fruit(nextType, x, y, this.world);
         }
         
+        if(Fruit.se.pon_cute)Fruit.se.pon_cute.play();//自　効果音
+
     }
 }
 
@@ -71,43 +82,51 @@ let data = {
     cherry:{
         color: '#dd1111',
         size: '10',
+        shape: scaleShape(ShapeCherry,0.4),
         next: 'berry',
     },
     berry:{
         color: 'crimson',
         size: '20',
+        shape: scaleShape(ShapeBerry,0.25),
         next: 'grape',
     },
     grape:{
         color: 'purple',
         size: '30',
+        shape: scaleShape(ShapeGrape,0.45),
         next: 'orange',
     },
     orange:{
         color: 'orange',
         size: '40',
+        shape: scaleShape(ShapeOrange,0.6),
         next: 'kaki',
     },
-    // kaki:{
-    //     color: '#ff6200',
-    //     size: '50',
-    //     next: 'apple',
-    // },
-    // apple:{
-    //     color: 'red',
-    //     size: '55',
-    //     next: 'peach',
-    // },
-    // peach:{
-    //     color: '#ffbaf5',
-    //     size: '60',
-    //     next: 'melon',
-    // },
-    // melon:{
-    //     color: '#36ff5a',
-    //     size: '70',
-    //     next: 'watermelon',
-    // },
+    kaki:{
+        color: '#ff6200',
+        size: '50',
+        shape: scaleShape(ShapeKaki,0.6),
+        next: 'apple',
+    },
+    apple:{
+        color: 'red',
+        size: '55',
+        shape: scaleShape(ShapeApple,0.7),
+        next: 'peach',
+    },
+    peach:{
+        color: '#ffbaf5',
+        size: '60',
+        shape: scaleShape(ShapePeach,0.8),
+        next: 'melon',
+    },
+    melon:{
+        color: '#36ff5a',
+        size: '70',
+        shape: scaleShape(ShapeMelon,0.9),
+        next: 'watermelon',
+    },
 };
 
 export{Fruit};//フルートクラスを輸出する
