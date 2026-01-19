@@ -15,6 +15,17 @@ let scene = 'title';
 //次に落ちる果物
 let nextFruit = 'cherry';
 
+let imgh;
+let imgt;
+let bgm;
+
+function preload(){
+  imgh = loadImage('assets/haikei.jpeg');
+  imgt = loadImage('assets/title.png');
+
+  bgm = loadSound('assets/bgm.mp3');
+}
+
 function setup() {
   createCanvas(400, 400);
 
@@ -51,7 +62,15 @@ function setup() {
 }
 
 function draw() {
-  background(220);
+  //background(220);
+  image(imgh, 0, 0, width, height);//背景
+
+  if(scene=='play'){
+
+    textAlign(LEFT);
+    textSize(20);
+    text('Next: '+nextFruit,20,40);
+  }
 
   //世界に配置された全ての物体を取得（配列）
   let bodies = Composite.allBodies(engine.world);
@@ -65,21 +84,27 @@ function draw() {
   Engine.update(engine,deltaTime);
   
   if (scene == 'title'){//タイトル画面だったら
-    textAlign(CENTER);
-    textSize(50);
-    text('Fruit Game', 200, 200);//ゲームの名前、キャンバスは変えていい！！
+    // textAlign(CENTER);
+    // textSize(50);
+    // text('Fruit Game', 200, 200);//ゲームの名前、キャンバスは変えていい！！
 
-  }else if(scene=='play'){
-    textAlign(LEFT);
-    textSize(20);
-    text('Next: '+nextFruit,20,40);
+    imageMode(CENTER);   //画像の基準　中央
+    image(imgt, width/2, height/2.2, width/1.5, height/2);
+    imageMode(CORNER);  //元に戻す
+
   }
+  
 }
 
 //クリックをすると実行　　　ここ復習したい！
 function mousePressed(){
   if (scene == 'title'){//タイトル画面
     scene = 'play';//プレイ画面
+
+    //BGMスタート　自　クリックしないとBGMは鳴らせないらしい多分
+    userStartAudio();
+    bgm.loop();
+
   }else if (scene == 'play'){//プレイ画面
   //Fruitインスタンスを生成
   new Fruit(nextFruit, mouseX, 80, engine.world);
@@ -95,6 +120,7 @@ function mousePressed(){
 
 
 //type="module"の場合は以下が必要
+window.preload = preload;
 window.setup = setup;
 window.draw = draw;
 window.mousePressed = mousePressed;
