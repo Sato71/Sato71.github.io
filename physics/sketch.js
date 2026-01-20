@@ -1,6 +1,6 @@
 import { Fruit } from './Fruit.js';//輸入
 import { ShapeStage } from './shapes.js';//形状データを輸入
-import { drawBody } from './util.js';
+import { drawBody, isOutOfBounds } from './util.js';
 
 let { Engine, Bodies, Composite, Events } = Matter;//モジュールを変数化
 let engine;//物理演算用の空間
@@ -14,6 +14,14 @@ let scene = 'title';
 
 //次に落ちる果物
 let nextFruit = 'cherry';
+
+// 共有データ
+window.data = {
+  score: 0, // 合計スコア
+}
+
+//時間が進む速さ
+let delta = 1000/60;
 
 let imgh;
 let imgt;
@@ -69,19 +77,30 @@ function draw() {
 
     textAlign(LEFT);
     textSize(20);
-    text('Next: '+nextFruit,20,40);
+    text('Next: '+nextFruit, 20, 40);
+
+    textSize(20);
+    textAlign(RIGHT);
+    text('Score: ' + window.data.score, 380, 40);
   }
 
   //世界に配置された全ての物体を取得（配列）
   let bodies = Composite.allBodies(engine.world);
   
+  //すべての物体を描画
   for(let i = 0; i < bodies.length; i++){
-    if (bodies[i].fruit)bodies[i].fruit.draw();
-    else drawBody(bodies[i]);
+    if (bodies[i].fruit){
+      bodies[i].fruit.draw();
+      if(isOutOfBounds(bodies[i], 0, 0, width, height)){
+        //物体が画面外に出たら
+        scene = 'gameover';//ゲームオーバー画面に移行
+        delta = 1000/(60*4);
+      }
+    }else drawBody(bodies[i]);
   }
   
   //世界の更新(1フレーム時間を進める)
-  Engine.update(engine,deltaTime);
+  Engine.update(engine, delta);
   
   if (scene == 'title'){//タイトル画面だったら
     // textAlign(CENTER);
@@ -94,11 +113,22 @@ function draw() {
 
   }
   
+  //これでもいい？elseifじゃなくても
+  if(scene == 'gameover'){
+    textAlign(CENTER);
+    textSize(50);
+    text('GameOver!', 200, 200);
+
+    bgm.stop();
+  }
 }
 
 //クリックをすると実行　　　ここ復習したい！
 function mousePressed(){
   if (scene == 'title'){//タイトル画面
+
+    window.data.score = 0;
+
     scene = 'play';//プレイ画面
 
     //BGMスタート　自　クリックしないとBGMは鳴らせないらしい多分
@@ -115,6 +145,20 @@ function mousePressed(){
   ];
   let choice=round(random(0,2));
   nextFruit=choices[choice];
+
+  }else if(scene == 'gameover'){
+    cleanStage();
+    delta = 1000/60;
+    scene='title';
+  }
+}
+
+function cleanStage(){
+  let bodies = Composite.allBodies(engine.world);
+  for (let i = 0; i < bodies.length; i++){
+    if(bodies[i].fruit){
+      Composite.remove(engine.world,bodies[i]);
+    }
   }
 }
 

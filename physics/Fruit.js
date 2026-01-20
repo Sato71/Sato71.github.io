@@ -75,6 +75,8 @@ class Fruit{
         
         if(Fruit.se.pon_cute)Fruit.se.pon_cute.play();//自　効果音
 
+        window.data.score += 10;
+
     }
 }
 
